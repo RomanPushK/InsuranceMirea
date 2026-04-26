@@ -2,21 +2,18 @@ package org.example.model
 
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 import org.example.types.InsuranceObjects
 import org.example.types.InsuranceStatuses
 
 @Serializable
-data class Contracts (
+data class Contract (
     val id: Int,
     val userId: Int,
-    var insuranceObject: InsuranceObjects,
-    var price: Int,
-    var startDate: LocalDate,
-    var endDate: LocalDate,
-    var status: InsuranceStatuses
+    val insuranceObject: InsuranceObjects,
+    val price: Int,
+    val startDate: LocalDate,
+    val endDate: LocalDate,
+    val status: InsuranceStatuses
 ) {
     fun calculateAmount(): Int {
         return when (insuranceObject) {
@@ -31,6 +28,14 @@ data class Contracts (
         }
     }
 
-    @Transient
+    fun updateAmount() {
+        amount = calculateAmount()
+    }
+
+    @kotlinx.serialization.Transient
     var amount: Int = calculateAmount()
+
+    override fun toString(): String {
+        return "ContractID: $id, UserID: $userId, Insurance object: $insuranceObject, Price: $price, Start date: $startDate, End date: $endDate, Status: $status, Amount: $amount"
+    }
 }

@@ -1,14 +1,29 @@
 package org.example.model
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 
 @Serializable
 data class User (
     val id: Int,
-    var firstName: String,
-    var lastName: String,
-    var passport: Int,
-)
+    val firstName: String,
+    val lastName: String,
+    val passport: Int
+) {
+    @kotlinx.serialization.Transient
+    val contracts: MutableList<Contract> = mutableListOf()
+
+    fun updateContracts(contracts: List<Contract>): Boolean {
+        this.contracts.clear()
+        this.contracts += contracts
+        return true
+    }
+
+    fun printWithContracts(): String {
+        return "UserID: $id, First name: $firstName, Last name: $lastName, Passport: $passport, Contracts: {\n" +
+                contracts.joinToString(separator = "\n\t", prefix = "\t") + "\n}"
+    }
+
+    override fun toString(): String {
+        return "UserID: $id, First name: $firstName, Last name: $lastName, Passport: $passport"
+    }
+}

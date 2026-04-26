@@ -1,41 +1,98 @@
 package org.example.repositories
 
 import kotlinx.serialization.json.Json
+import org.example.model.Contract
 import org.example.model.User
+import org.example.types.UserFields
 import java.io.File
 import kotlin.collections.mutableListOf
 
 class UserRepository {
-    private val file = File("data/Users.json")
-    val users: MutableList<User> = try {
+    private val file = File("src/data/Users.json")
+    private val users: MutableList<User> = try {
         Json.decodeFromString<MutableList<User>>(file.readText())
     } catch(error: Exception) {
         System.err.println("Произошла ошибка при загрузке пользователей из файла. ${error.message}")
         mutableListOf()
     }
 
-    fun addUser(user: User) {
-        users.addLast(user)
+    fun getUsers(): List<User> {
+        return users
     }
 
-    fun deleteUser(id: Int) {
-        users.filter { user -> user.id != id }
+    fun getById(id: Int): User? {
+        return users.find { it.id == id }
     }
 
-    fun updateUser(id: Int, field: String, newValue: String): Boolean {
-        val user = users.find { it.id == id } ?: return false
+    fun addUser(user: User): Boolean {
+        try {
+            users.addLast(user)
+            return true
+        } catch (err: Exception) { return false }
+    }
+
+    fun deleteUser(id: Int): Boolean {
+        return users.removeIf { it.id == id }
+    }
+
+    fun fullUpdateUser(id: Int, newUser: User): Boolean {
+        val index = users.indexOfFirst { it.id == id }
+        if (index == -1) return false
+        users[index] = newUser
+        return true
+    }
+
+    fun updateFirstName(id: Int, firstName: String): Boolean {
+        val index = users.indexOfFirst { it.id == id }
+        if (index == -1) return false
+        val curr = users[index]
+        users[index] = curr.copy(firstName = firstName)
+        return true
+    }
+
+    fun updateLastName(id: Int, lastName: String): Boolean {
+        val index = users.indexOfFirst { it.id == id }
+        if (index == -1) return false
+        val curr = users[index]
+        users[index] = curr.copy(lastName = lastName)
+        return true
+    }
+
+    fun updatePassport(id: Int, passport: Int): Boolean {
+        val index = users.indexOfFirst { it.id == id }
+        if (index == -1) return false
+        val curr = users[index]
+        users[index] = curr.copy(passport = passport)
+        return true
+    }
+
+    fun sortUsers(field: UserFields): Boolean {
         return when (field) {
-            "firstName" -> { user.firstName = newValue; true }
-            "lastName" -> { user.lastName = newValue; true }
-            "passport" -> newValue.toIntOrNull()?.let {
-                user.passport = it
-                true
-            } ?: false
+            UserFields.ID -> { users.sortBy { it.id } ; true }
+            UserFields.FIRST_NAME -> { users.sortBy { it.firstName } ; true }
+            UserFields.LAST_NAME -> { users.sortBy { it.lastName } ; true }
+            UserFields.PASSPORT -> { users.sortBy { it.passport } ; true}
             else -> false
         }
     }
 
+    fun updateAllUsersContracts(contracts: List<Contract>): Boolean {
+        users.forEach { user -> user.updateContracts(contracts.filter { it.userId == user.id }) }
+        return true
+    }
+
+    fun updateUserContracts(userId: Int, contracts: List<Contract>): Boolean {
+        getById(userId)?.updateContracts(contracts) ?: return false
+        return true
+    }
+
+    fun printWithContracts(): String {
+        val result: MutableList<String> = mutableListOf()
+        users.forEach { result.add(it.printWithContracts() + "\n") }
+        return result.joinToString(separator = "\n")
+    }
+
     override fun toString(): String {
-        return super.toString()
+        return users.joinToString(separator = "\n")
     }
 }
