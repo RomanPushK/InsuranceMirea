@@ -4,7 +4,16 @@ import org.example.model.User
 import org.example.repositories.ContractsRepository
 import org.example.repositories.UserRepository
 import org.example.types.UserFields
+import org.example.util.ConsoleInput
 import java.io.PrintStream
+
+class Main {
+    val users = UserRepository()
+    val contracts = ContractsRepository()
+    val console = ConsoleInput()
+
+    fun run() {}
+}
 
 fun main() {
     System.setProperty("console.encoding", "UTF-8")
@@ -13,7 +22,7 @@ fun main() {
 
     val users = UserRepository()
     val contracts = ContractsRepository()
-    users.addUser(User(16, "Ilya", "Sventoigrafov", 228337))
+    users.addUser(User(16, "Ilya", "Sventografov", 228337))
     users.deleteUser(3)
     println(users)
     users.fullUpdateUser(1, User(1, "qwe", "234", 23))

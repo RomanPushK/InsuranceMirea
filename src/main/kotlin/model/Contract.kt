@@ -10,12 +10,12 @@ data class Contract (
     val id: Int,
     val userId: Int,
     val insuranceObject: InsuranceObjects,
-    val price: Int,
+    val price: Double,
     val startDate: LocalDate,
     val endDate: LocalDate,
     val status: InsuranceStatuses
 ) {
-    fun calculateAmount(): Int {
+    fun calculateAmount(): Double {
         return when (insuranceObject) {
             InsuranceObjects.CAR -> price * 10
             InsuranceObjects.HOUSE -> price * 12
@@ -33,7 +33,7 @@ data class Contract (
     }
 
     @kotlinx.serialization.Transient
-    var amount: Int = calculateAmount()
+    var amount: Double = calculateAmount()
 
     override fun toString(): String {
         return "ContractID: $id, UserID: $userId, Insurance object: $insuranceObject, Price: $price, Start date: $startDate, End date: $endDate, Status: $status, Amount: $amount"

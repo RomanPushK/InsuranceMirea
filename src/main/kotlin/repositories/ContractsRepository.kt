@@ -1,7 +1,11 @@
 package org.example.repositories
 
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
 import org.example.model.Contract
+import org.example.model.User
+import org.example.types.InsuranceObjects
+import org.example.types.InsuranceStatuses
 import java.io.File
 
 class ContractsRepository {
@@ -15,6 +19,10 @@ class ContractsRepository {
 
     fun getContracts(): List<Contract> {
         return contracts
+    }
+
+    fun getById(id: Int): Contract? {
+        return contracts.find { it.id == id }
     }
 
     fun getContractsByUser(userId: Int): List<Contract> {
@@ -39,7 +47,60 @@ class ContractsRepository {
     fun fullUpdateContract(id: Int, newContract: Contract): Boolean {
         val index = contracts.indexOfFirst { it.id == id }
         if (index == -1) return false
-        contracts[index] = newContract
+        contracts[index] = newContract.copy(id = id)
+        return true
+    }
+
+    fun updateUserID(id: Int, userId: Int): Boolean {
+        val index = contracts.indexOfFirst { it.id == id }
+        if (index == -1) return false
+        val curr = contracts[index]
+        contracts[index] = curr.copy(userId = userId)
+        contracts[index].calculateAmount()
+        return true
+    }
+
+    fun updateObject(id: Int, insuranceObject: InsuranceObjects): Boolean {
+        val index = contracts.indexOfFirst { it.id == id }
+        if (index == -1) return false
+        val curr = contracts[index]
+        contracts[index] = curr.copy(insuranceObject = insuranceObject)
+        contracts[index].calculateAmount()
+        return true
+    }
+
+    fun updatePrice(id: Int, price: Double): Boolean {
+        val index = contracts.indexOfFirst { it.id == id }
+        if (index == -1) return false
+        val curr = contracts[index]
+        contracts[index] = curr.copy(price = price)
+        contracts[index].calculateAmount()
+        return true
+    }
+
+    fun updateStartDate(id: Int, startDate: LocalDate): Boolean {
+        val index = contracts.indexOfFirst { it.id == id }
+        if (index == -1) return false
+        val curr = contracts[index]
+        if (startDate > curr.endDate) return false
+        contracts[index] = curr.copy(startDate = startDate)
+        return true
+    }
+
+    fun updateEndDate(id: Int, endDate: LocalDate): Boolean {
+        val index = contracts.indexOfFirst { it.id == id }
+        if (index == -1) return false
+        val curr = contracts[index]
+        if (endDate < curr.startDate)
+        contracts[index] = curr.copy(endDate = endDate)
+        return true
+    }
+
+    fun updateStatus(id: Int, status: InsuranceStatuses): Boolean {
+        val index = contracts.indexOfFirst { it.id == id }
+        if (index == -1) return false
+        val curr = contracts[index]
+        contracts[index] = curr.copy(status = status)
         return true
     }
 

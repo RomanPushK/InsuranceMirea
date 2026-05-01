@@ -38,7 +38,7 @@ class UserRepository {
     fun fullUpdateUser(id: Int, newUser: User): Boolean {
         val index = users.indexOfFirst { it.id == id }
         if (index == -1) return false
-        users[index] = newUser
+        users[index] = newUser.copy(id = id)
         return true
     }
 
