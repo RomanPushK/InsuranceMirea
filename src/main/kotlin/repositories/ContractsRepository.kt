@@ -9,12 +9,24 @@ import org.example.types.InsuranceStatuses
 import java.io.File
 
 class ContractsRepository {
+    companion object {
+        var nextId = 1
+    }
+
     private val file = File("src/data/Contracts.json")
     private val contracts: MutableList<Contract> = try {
         Json.decodeFromString<MutableList<Contract>>(file.readText())
     } catch(error: Exception) {
         System.err.println("Произошла ошибка при загрузке контрактов из файла. ${error.message}")
         mutableListOf()
+    }
+
+    constructor() {
+        nextId = contracts[contracts.lastIndex].id + 1
+    }
+
+    fun getSize(): Int {
+        return contracts.size
     }
 
     fun getContracts(): List<Contract> {
@@ -37,11 +49,13 @@ class ContractsRepository {
     }
 
     fun deleteContract(id: Int): Boolean {
-        return contracts.removeIf { it.id == id }
+        val res = contracts.removeIf { it.id == id }
+        return res
     }
 
     fun deleteContractsByUser(userId: Int): Boolean {
-        return contracts.removeIf { it.userId == userId }
+        val res = contracts.removeIf { it.userId == userId }
+        return res
     }
 
     fun fullUpdateContract(id: Int, newContract: Contract): Boolean {

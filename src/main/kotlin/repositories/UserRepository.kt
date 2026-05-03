@@ -8,12 +8,24 @@ import java.io.File
 import kotlin.collections.mutableListOf
 
 class UserRepository {
+    companion object {
+        var nextId = 1
+    }
+
     private val file = File("src/data/Users.json")
     private val users: MutableList<User> = try {
         Json.decodeFromString<MutableList<User>>(file.readText())
     } catch(error: Exception) {
         System.err.println("Произошла ошибка при загрузке пользователей из файла. ${error.message}")
         mutableListOf()
+    }
+
+    constructor() {
+        nextId = users[users.lastIndex].id + 1
+    }
+
+    fun getSize(): Int {
+        return users.size
     }
 
     fun getUsers(): List<User> {
@@ -32,7 +44,8 @@ class UserRepository {
     }
 
     fun deleteUser(id: Int): Boolean {
-        return users.removeIf { it.id == id }
+        val res = users.removeIf { it.id == id }
+        return res
     }
 
     fun fullUpdateUser(id: Int, newUser: User): Boolean {
@@ -47,6 +60,7 @@ class UserRepository {
         if (index == -1) return false
         val curr = users[index]
         users[index] = curr.copy(firstName = firstName)
+        users[index].contracts.addAll(curr.contracts)
         return true
     }
 
@@ -55,6 +69,7 @@ class UserRepository {
         if (index == -1) return false
         val curr = users[index]
         users[index] = curr.copy(lastName = lastName)
+        users[index].contracts.addAll(curr.contracts)
         return true
     }
 
@@ -63,6 +78,7 @@ class UserRepository {
         if (index == -1) return false
         val curr = users[index]
         users[index] = curr.copy(passport = passport)
+        users[index].contracts.addAll(curr.contracts)
         return true
     }
 

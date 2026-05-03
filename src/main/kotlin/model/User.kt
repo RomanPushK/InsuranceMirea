@@ -19,11 +19,12 @@ data class User (
     }
 
     fun printWithContracts(): String {
-        return "UserID: $id, First name: $firstName, Last name: $lastName, Passport: $passport, Contracts: {\n" +
-                contracts.joinToString(separator = "\n\t", prefix = "\t") + "\n}"
+        if (contracts.isEmpty()) return "UserID: $id, First name: $firstName, Last name: $lastName, Passport: $passport, Contracts: { }"
+        return "UserID: $id, First name: $firstName, Last name: $lastName, Passport: $passport, Contracts: {" +
+                contracts.joinToString(separator = "\n\t", prefix = "\n\t", postfix = "\n") + "}"
     }
 
     override fun toString(): String {
-        return "UserID: $id, First name: $firstName, Last name: $lastName, Passport: $passport"
+        return "UserID: $id, First name: $firstName, Last name: $lastName, Passport: $passport, Contracts: ${contracts.size}"
     }
 }
