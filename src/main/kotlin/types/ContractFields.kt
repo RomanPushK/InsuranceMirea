@@ -1,11 +1,12 @@
 package org.example.types
 
-enum class ContractFields {
-    ID,
-    USER_ID,
-    INSURANCE_OBJECT,
-    PRICE,
-    START_DATE,
-    END_DATE,
-    STATUS
+enum class ContractFields(displayName: String) {
+    ID("ID Контракта"),
+    USER_ID("ID Пользователя"),
+    INSURANCE_OBJECT("Объект страхования"),
+    PRICE("Цена страховки"),
+    START_DATE("Дата начала контракта"),
+    END_DATE("Дата истечения контракта"),
+    STATUS("Статус контракта"),
+    AMOUNT("Выплата")
 }

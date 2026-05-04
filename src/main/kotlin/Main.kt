@@ -10,6 +10,20 @@ import org.example.types.UserFields
 import org.example.util.ConsoleInput
 import java.io.PrintStream
 
+fun MutableList<UserFields>.tryAdd(field: UserFields) {
+    if (this.size >= 2) {
+        println("Ошибка. Нельзя добавить больше полей сортировки")
+        return
+    }
+    else if (this.contains(field)) {
+        println("Ошибка. Данное поле уже выбрано")
+        return
+    }
+    else {
+        this.addLast(field)
+    }
+}
+
 class Main {
     private val usersRepo = UserRepository()
     private val contractsRepo = ContractsRepository()
@@ -180,7 +194,7 @@ class Main {
             return
         }
 
-        val insuranceObject = console.readEnum<InsuranceObjects>("Объект страховки",
+        val insuranceObject = console.readEnum<InsuranceObjects>("Объект страхования",
             InsuranceObjects.entries.toTypedArray()
         ) { it.displayName }
 
@@ -230,7 +244,13 @@ class Main {
                 0 -> return
                 1 -> {
                     val newVal = console.readPositiveInt("Новый пользователь")
+                    if (usersRepo.getById(newVal) == null) {
+                        println("Пользователь не найден")
+                        continue
+                    }
                     contractsRepo.updateUserID(id, newVal)
+                    usersRepo.updateUserContracts(contract.userId, contractsRepo.getContractsByUser(contract.userId))
+                    usersRepo.updateUserContracts(newVal, contractsRepo.getContractsByUser(newVal))
                     contract = contract.copy(userId = newVal)
                 }
                 2 -> {
@@ -294,8 +314,60 @@ class Main {
 
     private fun sortUsersMenu() {
         println("СОРТИРОВКА ПОЛЬЗОВАТЕЛЕЙ")
-        println("1. По ID\n2. По имени\n3. По фамилии\n4. По паспорту")
-        val ch = console.validateInputInt("Введите номер", 1, 4)
+        println("1. По ID\n2. По имени\n3. По фамилии\n4. По паспорту\n0. Назад")
+        val ch = console.validateInputInt("Введите номер", 0, 4)
+        val field = when (ch) {
+            1 -> UserFields.ID
+            2 -> UserFields.FIRST_NAME
+            3 -> UserFields.LAST_NAME
+            4 -> UserFields.PASSPORT
+            else -> null
+        }
+        field?.let {
+            usersRepo.sortUsers(field)
+            printUsers()
+        }
+    }
+
+    fun selectUserSort(): List<UserFields> {
+        val selected: MutableList<UserFields> = mutableListOf()
+        var currSort = true
+
+        while (true) {
+            console.printUserSortOptions(selected, currSort)
+            val ch = console.validateInputInt("Выбор",0, 5)
+            when (ch) {
+                0 -> break
+                1 -> selected.tryAdd(UserFields.ID)
+                2 -> selected.tryAdd(UserFields.FIRST_NAME)
+                3 -> selected.tryAdd(UserFields.LAST_NAME)
+                4 -> selected.tryAdd(UserFields.PASSPORT)
+                5 -> currSort = !currSort
+                6 -> {
+                    if (selected.isNotEmpty()) {
+                        selected.removeLast()
+                    }
+                    else println("В списке нет элементов")
+                }
+            }
+        }
+        return selected
+    }
+
+    enum class ContractFields {
+        ID,
+        USER_ID,
+        INSURANCE_OBJECT,
+        PRICE,
+        START_DATE,
+        END_DATE,
+        STATUS
+    }
+
+    private fun sortContractsMenu() { /* аналогично */
+        println("СОРТИРОВКА КОНТРАКТОВ")
+        println("1. По ID\n2. По ID пользователя\n3. По объекту страхования\n4. По цене\n5. По дате подписания\n6. По дате истечения\n7. По статусу\n8. По выплате\n0. Назад")
+        val ch = console.validateInputInt("Введите номер", 0, 8)
         val field = when (ch) {
             1 -> UserFields.ID
             2 -> UserFields.FIRST_NAME
@@ -303,15 +375,11 @@ class Main {
             else -> UserFields.PASSPORT
         }
         usersRepo.sortUsers(field)
-        printUsers()
-    }
-
-    private fun sortContractsMenu() { /* аналогично */
-        println("Реализуй сортировку договоров")
-        consoleWait()
+        printContracts()
     }
 
     private fun showStatistics() {
+        selectUserSort()
         println("СТАТИСТИКА")
         val totalUsers = usersRepo.getUsers().size
         val totalContracts = contractsRepo.getContracts().size

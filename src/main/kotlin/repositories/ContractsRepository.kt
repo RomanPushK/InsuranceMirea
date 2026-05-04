@@ -3,7 +3,7 @@ package org.example.repositories
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
 import org.example.model.Contract
-import org.example.model.User
+import org.example.types.ContractFields
 import org.example.types.InsuranceObjects
 import org.example.types.InsuranceStatuses
 import java.io.File
@@ -21,7 +21,7 @@ class ContractsRepository {
         mutableListOf()
     }
 
-    constructor() {
+    init {
         nextId = contracts[contracts.lastIndex].id + 1
     }
 
@@ -58,6 +58,20 @@ class ContractsRepository {
         return res
     }
 
+    fun sortContracts(field: ContractFields): Boolean {
+        return when (field) {
+            ContractFields.ID -> { contracts.sortBy { it.id } ; true }
+            ContractFields.USER_ID -> { contracts.sortBy { it.userId } ; true }
+            ContractFields.INSURANCE_OBJECT -> { contracts.sortBy { it.insuranceObject } ; true }
+            ContractFields.PRICE -> { contracts.sortBy { it.price } ; true}
+            ContractFields.START_DATE -> { contracts.sortBy { it.startDate } ; true }
+            ContractFields.END_DATE -> { contracts.sortBy { it.endDate } ; true }
+            ContractFields.STATUS -> { contracts.sortBy { it.status } ; true}
+            ContractFields.AMOUNT -> { contracts.sortBy { it.amount }; true}
+            else -> false
+        }
+    }
+
     fun fullUpdateContract(id: Int, newContract: Contract): Boolean {
         val index = contracts.indexOfFirst { it.id == id }
         if (index == -1) return false
@@ -70,7 +84,7 @@ class ContractsRepository {
         if (index == -1) return false
         val curr = contracts[index]
         contracts[index] = curr.copy(userId = userId)
-        contracts[index].calculateAmount()
+        contracts[index]
         return true
     }
 

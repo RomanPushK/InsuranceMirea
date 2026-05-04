@@ -1,6 +1,7 @@
 package org.example.util
 
 import kotlinx.datetime.LocalDate
+import org.example.types.UserFields
 
 class ConsoleInput {
     fun clearConsole() {
@@ -104,7 +105,7 @@ class ConsoleInput {
         println("ГЛАВНОЕ МЕНЮ")
         println("1. Вывод пользователей")
         println("2. Вывод контрактов")
-        println("3. Вывод детализации пользователей")
+        println("3. Вывод пользователей с детальными контрактами")
         println("4. Редактор пользователей")
         println("5. Редактор контрактов")
         println("6. Поиск пользователей")
@@ -132,6 +133,43 @@ class ConsoleInput {
         println("4. Список всех контрактов")
         println("5. Контракты пользователя (по ID пользователя)")
         println("0. Назад в главное меню")
+    }
+
+
+
+    fun printUserSortMenu(fields: List<UserFields>, ) {
+        println("СОРТИРОВКА ПОЛЬЗОВАТЕЛЕЙ")
+        if (!fields.isEmpty()) {
+            print("Выбранные поля: ")
+            println(fields.joinToString(separator = ", ", postfix = "\n"))
+        }
+        else {
+            println("По стандарту сортировка происходит по Id")
+        }
+        println()
+        println("1. Выбрать поля сортировки")
+        println("2. Отсортировать и вывести")
+        println("0. Назад")
+    }
+
+    fun printUserSortOptions(fields: MutableList<UserFields>, currSort: Boolean) {
+        println("\nВыберите, как будет происходить сортировка")
+        println("Можно выбрать максимум 2 поля")
+        if (!fields.isEmpty()) {
+            print("Выбранные поля: ")
+            println(fields.joinToString(separator = ", "))
+        }
+        if (currSort) {
+            println("Выбранный порядок: По возрастанию\n")
+        }
+        else println("Выбранный порядок: По убыванию")
+        println("1. ID")
+        println("2. Имя")
+        println("3. Фамилия")
+        println("4. Пасспорт")
+        println("5. Удалить последний вариант")
+        println("6. Поменять порядок сортировки")
+        println("0. Назад")
     }
 
     fun printSearchMenu(title: String) {
