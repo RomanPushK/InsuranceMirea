@@ -4,13 +4,29 @@ import org.example.model.Contract
 import org.example.model.User
 import org.example.repositories.ContractsRepository
 import org.example.repositories.UserRepository
+import org.example.types.ContractFields
 import org.example.types.InsuranceObjects
 import org.example.types.InsuranceStatuses
 import org.example.types.UserFields
 import org.example.util.ConsoleInput
+import java.awt.Paint
 import java.io.PrintStream
 
 fun MutableList<UserFields>.tryAdd(field: UserFields) {
+    if (this.size >= 2) {
+        println("Ошибка. Нельзя добавить больше полей сортировки")
+        return
+    }
+    else if (this.contains(field)) {
+        println("Ошибка. Данное поле уже выбрано")
+        return
+    }
+    else {
+        this.addLast(field)
+    }
+}
+
+fun MutableList<ContractFields>.tryAdd(field: ContractFields) {
     if (this.size >= 2) {
         println("Ошибка. Нельзя добавить больше полей сортировки")
         return
@@ -301,85 +317,159 @@ class Main {
         consoleWait()
     }
 
-    // ====================== ПОИСК И СОРТИРОВКА ======================
-    private fun searchUsers() { /* реализуй */
-        println("Реализуй поиск пользователей")
+    private fun searchUsers() {
+        while (true) {
+            console.printSearchMenu("ПОЛЬЗОВАТЕЛЕЙ")
+            val ch = console.validateInputInt("Выбор", 0, 2)
+            when (ch) {
+                0 -> return
+                1 -> searchUsersId()
+                2 -> searchUsersString()
+            }
+        }
+    }
+
+    private fun searchUsersId() {
+        println("Введите ID для поиска")
+        val ch = console.readPositiveInt("Id")
+        println(usersRepo.search(ch).joinToString(separator = "\n", prefix = "\n"))
         consoleWait()
     }
 
-    private fun searchContracts() { /* реализуй */
-        println("Реализуй поиск договоров")
+    private fun searchUsersString() {
+        println("Введите ID для поиска")
+        val ch = console.readString("Подстрока")
+        println(usersRepo.search(ch).joinToString(separator = "\n", prefix = "\n"))
+        consoleWait()
+    }
+
+    private fun searchContracts() {
+        while (true) {
+            console.printSearchMenu("КОНТРАКТОВ")
+            val ch = console.validateInputInt("Выбор", 0, 2)
+            when (ch) {
+                0 -> return
+                1 -> searchContractsId()
+                2 -> searchContractsString()
+            }
+        }
+    }
+
+    private fun searchContractsId() {
+        println("Введите ID для поиска")
+        val ch = console.readPositiveInt("Id")
+        println(contractsRepo.search(ch).joinToString(separator = "\n", prefix = "\n"))
+        consoleWait()
+    }
+
+    private fun searchContractsString() {
+        println("Введите ID для поиска")
+        val ch = console.readString("Подстрока")
+        println(contractsRepo.search(ch).joinToString(separator = "\n", prefix = "\n"))
         consoleWait()
     }
 
     private fun sortUsersMenu() {
-        println("СОРТИРОВКА ПОЛЬЗОВАТЕЛЕЙ")
-        println("1. По ID\n2. По имени\n3. По фамилии\n4. По паспорту\n0. Назад")
-        val ch = console.validateInputInt("Введите номер", 0, 4)
-        val field = when (ch) {
-            1 -> UserFields.ID
-            2 -> UserFields.FIRST_NAME
-            3 -> UserFields.LAST_NAME
-            4 -> UserFields.PASSPORT
-            else -> null
-        }
-        field?.let {
-            usersRepo.sortUsers(field)
-            printUsers()
+        var fields: MutableList<UserFields> = mutableListOf()
+        var currSort = true
+        while (true) {
+            console.printUserSortMenu(fields, currSort)
+            val ch = console.validateInputInt("Выбор", 0, 2)
+            when (ch) {
+                0 -> return
+                1 -> {
+                    val res = selectUserSort(fields, currSort)
+                    fields = res.first
+                    currSort = res.second
+                }
+                2 -> {
+                    usersRepo.sortUsers(fields, currSort)
+                    println(usersRepo)
+                    consoleWait()
+                }
+            }
         }
     }
 
-    fun selectUserSort(): List<UserFields> {
-        val selected: MutableList<UserFields> = mutableListOf()
-        var currSort = true
-
+    private fun selectUserSort(
+        selected: MutableList<UserFields> = mutableListOf(),
+        currSort_: Boolean = true
+    ): Pair<MutableList<UserFields>, Boolean> {
+        var currSort = currSort_
         while (true) {
             console.printUserSortOptions(selected, currSort)
-            val ch = console.validateInputInt("Выбор",0, 5)
+            val ch = console.validateInputInt("Выбор",0, 6)
             when (ch) {
                 0 -> break
                 1 -> selected.tryAdd(UserFields.ID)
                 2 -> selected.tryAdd(UserFields.FIRST_NAME)
                 3 -> selected.tryAdd(UserFields.LAST_NAME)
                 4 -> selected.tryAdd(UserFields.PASSPORT)
-                5 -> currSort = !currSort
-                6 -> {
+                5 -> {
                     if (selected.isNotEmpty()) {
                         selected.removeLast()
                     }
                     else println("В списке нет элементов")
                 }
+                6 -> currSort = !currSort
             }
         }
-        return selected
+        return Pair(selected, currSort)
     }
 
-    enum class ContractFields {
-        ID,
-        USER_ID,
-        INSURANCE_OBJECT,
-        PRICE,
-        START_DATE,
-        END_DATE,
-        STATUS
-    }
-
-    private fun sortContractsMenu() { /* аналогично */
-        println("СОРТИРОВКА КОНТРАКТОВ")
-        println("1. По ID\n2. По ID пользователя\n3. По объекту страхования\n4. По цене\n5. По дате подписания\n6. По дате истечения\n7. По статусу\n8. По выплате\n0. Назад")
-        val ch = console.validateInputInt("Введите номер", 0, 8)
-        val field = when (ch) {
-            1 -> UserFields.ID
-            2 -> UserFields.FIRST_NAME
-            3 -> UserFields.LAST_NAME
-            else -> UserFields.PASSPORT
+    private fun sortContractsMenu() {
+        var fields: MutableList<ContractFields> = mutableListOf()
+        var currSort = true
+        while (true) {
+            console.printContractSortMenu(fields, currSort)
+            val ch = console.validateInputInt("Выбор", 0, 2)
+            when (ch) {
+                0 -> return
+                1 -> {
+                    val res = selectContractsSort(fields, currSort)
+                    fields = res.first
+                    currSort = res.second
+                }
+                2 -> {
+                    contractsRepo.sortContracts(fields, currSort)
+                    println(contractsRepo)
+                    consoleWait()
+                }
+            }
         }
-        usersRepo.sortUsers(field)
-        printContracts()
+    }
+
+    private fun selectContractsSort(
+        selected: MutableList<ContractFields> = mutableListOf(),
+        currSort_: Boolean = true
+    ): Pair<MutableList<ContractFields>, Boolean> {
+        var currSort = currSort_
+        while (true) {
+            console.printContractSortOptions(selected, currSort)
+            val ch = console.validateInputInt("Выбор",0, 10)
+            when (ch) {
+                0 -> break
+                1 -> selected.tryAdd(ContractFields.ID)
+                2 -> selected.tryAdd(ContractFields.USER_ID)
+                3 -> selected.tryAdd(ContractFields.INSURANCE_OBJECT)
+                4 -> selected.tryAdd(ContractFields.PRICE)
+                5 -> selected.tryAdd(ContractFields.START_DATE)
+                6 -> selected.tryAdd(ContractFields.END_DATE)
+                7 -> selected.tryAdd(ContractFields.STATUS)
+                8 -> selected.tryAdd(ContractFields.AMOUNT)
+                9 -> {
+                    if (selected.isNotEmpty()) {
+                        selected.removeLast()
+                    }
+                    else println("В списке нет элементов")
+                }
+                10 -> currSort = !currSort
+            }
+        }
+        return Pair(selected, currSort)
     }
 
     private fun showStatistics() {
-        selectUserSort()
         println("СТАТИСТИКА")
         val totalUsers = usersRepo.getUsers().size
         val totalContracts = contractsRepo.getContracts().size

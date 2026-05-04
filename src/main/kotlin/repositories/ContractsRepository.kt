@@ -6,6 +6,9 @@ import org.example.model.Contract
 import org.example.types.ContractFields
 import org.example.types.InsuranceObjects
 import org.example.types.InsuranceStatuses
+import org.example.types.UserFields
+import org.example.util.ContractComparator
+import org.example.util.UserComparator
 import java.io.File
 
 class ContractsRepository {
@@ -58,17 +61,68 @@ class ContractsRepository {
         return res
     }
 
-    fun sortContracts(field: ContractFields): Boolean {
-        return when (field) {
-            ContractFields.ID -> { contracts.sortBy { it.id } ; true }
-            ContractFields.USER_ID -> { contracts.sortBy { it.userId } ; true }
-            ContractFields.INSURANCE_OBJECT -> { contracts.sortBy { it.insuranceObject } ; true }
-            ContractFields.PRICE -> { contracts.sortBy { it.price } ; true}
-            ContractFields.START_DATE -> { contracts.sortBy { it.startDate } ; true }
-            ContractFields.END_DATE -> { contracts.sortBy { it.endDate } ; true }
-            ContractFields.STATUS -> { contracts.sortBy { it.status } ; true}
-            ContractFields.AMOUNT -> { contracts.sortBy { it.amount }; true}
-            else -> false
+    fun sortContracts(fields: List<ContractFields>, currSort: Boolean) {
+        if (fields.isEmpty()) {
+            if (currSort) contracts.sortBy { it.id }
+            else contracts.sortByDescending { it.id }
+            return
+        }
+        if (fields.size == 1) {
+            when (fields[0]) {
+                ContractFields.ID -> {
+                    if (currSort) contracts.sortBy { it.id }
+                    else contracts.sortByDescending { it.id }
+                }
+                ContractFields.USER_ID -> {
+                    if (currSort) contracts.sortBy { it.userId }
+                    else contracts.sortByDescending { it.userId }
+                }
+                ContractFields.INSURANCE_OBJECT -> {
+                    if (currSort) contracts.sortBy { it.insuranceObject }
+                    else contracts.sortByDescending { it.insuranceObject }
+                }
+                ContractFields.PRICE -> {
+                    if (currSort) contracts.sortBy { it.price }
+                    else contracts.sortByDescending { it.price }
+                }
+                ContractFields.START_DATE -> {
+                    if (currSort) contracts.sortBy { it.startDate }
+                    else contracts.sortByDescending { it.startDate }
+                }
+                ContractFields.END_DATE -> {
+                    if (currSort) contracts.sortBy { it.endDate }
+                    else contracts.sortByDescending { it.endDate }
+                }
+                ContractFields.STATUS -> {
+                    if (currSort) contracts.sortBy { it.status }
+                    else contracts.sortByDescending { it.status }
+                }
+                ContractFields.AMOUNT -> {
+                    if (currSort) contracts.sortBy { it.amount }
+                    else contracts.sortByDescending { it.amount }
+                }
+            }
+            return
+        }
+        val first = fields[0]
+        val second = fields[1]
+        contracts.sortWith(ContractComparator(first, second, currSort))
+    }
+
+    fun search(id: Int): List<Contract> {
+        return contracts.filter { it.id.toString().lowercase().contains(id.toString().lowercase()) ||
+                it.userId.toString().lowercase().contains(id.toString().lowercase())
+        }
+    }
+
+    fun search(str: String): List<Contract> {
+        val strLower = str.lowercase()
+        return contracts.filter { it.insuranceObject.displayName.lowercase().contains(strLower) ||
+                    it.price.toString().lowercase().contains(strLower) ||
+                    it.startDate.toString().lowercase().contains(strLower) ||
+                    it.endDate.toString().lowercase().contains(strLower) ||
+                    it.status.displayName.lowercase().contains(strLower) ||
+                    it.amount.toString().lowercase().contains(strLower)
         }
     }
 

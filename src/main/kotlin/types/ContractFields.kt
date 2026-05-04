@@ -1,6 +1,6 @@
 package org.example.types
 
-enum class ContractFields(displayName: String) {
+enum class ContractFields(val displayName: String) {
     ID("ID Контракта"),
     USER_ID("ID Пользователя"),
     INSURANCE_OBJECT("Объект страхования"),
@@ -8,5 +8,7 @@ enum class ContractFields(displayName: String) {
     START_DATE("Дата начала контракта"),
     END_DATE("Дата истечения контракта"),
     STATUS("Статус контракта"),
-    AMOUNT("Выплата")
+    AMOUNT("Страховая выплата");
+
+    override fun toString() = displayName
 }

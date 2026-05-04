@@ -1,6 +1,7 @@
 package org.example.util
 
 import kotlinx.datetime.LocalDate
+import org.example.types.ContractFields
 import org.example.types.UserFields
 
 class ConsoleInput {
@@ -11,47 +12,42 @@ class ConsoleInput {
     }
     
     fun validateInputInt(str: String, startNum: Int, endNum: Int): Int {
-        var res = Int.MIN_VALUE
-        while (res == Int.MIN_VALUE) {
+        while (true) {
             print("$str: ")
             try {
-                res = readln().toInt()
-                if (res !in startNum..endNum) throw Exception()
+                val res = readln().toInt()
+                if (res in startNum..endNum) return res
+                throw Exception()
             } catch (e: Exception) {
                 println("Ошибка ввода. Введите целое число от $startNum до $endNum")
             }
         }
-
-        return res
     }
 
     fun readPositiveInt(str: String): Int {
-        var res = Int.MIN_VALUE
-        while (res == Int.MIN_VALUE) {
+        while (true) {
             print("$str: ")
             try {
-                res = readln().toInt()
-                if (res < 0) throw Exception()
+                val res = readln().toInt()
+                if (res >= 0) return res
+                throw Exception()
             } catch (e: Exception) {
                 println("Ошибка ввода. Введите положительное число")
             }
         }
-        return res
     }
 
     fun readPositiveDouble(str: String): Double {
-        var res = Double.MIN_VALUE
-        while (res == Double.MIN_VALUE) {
+        while (true) {
             print("$str: ")
             try {
-                res = readln().toDouble()
-                if (res < 0) throw Exception()
+                val res = readln().toDouble()
+                if (res >= 0) return res
+                throw Exception()
             } catch (e: Exception) {
                 println("Ошибка ввода. Введите положительное число")
             }
         }
-
-        return res
     }
 
     fun readString(str: String): String {
@@ -102,7 +98,7 @@ class ConsoleInput {
     }
 
     fun printMainMenu() {
-        println("ГЛАВНОЕ МЕНЮ")
+        println("\nГЛАВНОЕ МЕНЮ")
         println("1. Вывод пользователей")
         println("2. Вывод контрактов")
         println("3. Вывод пользователей с детальными контрактами")
@@ -117,7 +113,7 @@ class ConsoleInput {
     }
 
     fun printUserEditorMenu() {
-        println("РЕДАКТОР ПОЛЬЗОВАТЕЛЕЙ")
+        println("\nРЕДАКТОР ПОЛЬЗОВАТЕЛЕЙ")
         println("1. Добавить пользователя")
         println("2. Редактировать пользователя (по ID)")
         println("3. Удалить пользователя")
@@ -126,7 +122,7 @@ class ConsoleInput {
     }
 
     fun printContractEditorMenu() {
-        println("РЕДАКТОР КОНТРАКТОВ")
+        println("\nРЕДАКТОР КОНТРАКТОВ")
         println("1. Добавить контракт")
         println("2. Редактировать контракт (по ID)")
         println("3. Удалить контракт")
@@ -135,45 +131,77 @@ class ConsoleInput {
         println("0. Назад в главное меню")
     }
 
-
-
-    fun printUserSortMenu(fields: List<UserFields>, ) {
-        println("СОРТИРОВКА ПОЛЬЗОВАТЕЛЕЙ")
+    fun <T: Enum<T>> printSortMenu(str: String, fields: List<T>, currSort: Boolean) {
+        println("\nСОРТИРОВКА $str")
+        print("Выбранные поля: ")
         if (!fields.isEmpty()) {
-            print("Выбранные поля: ")
-            println(fields.joinToString(separator = ", ", postfix = "\n"))
+            println(fields.joinToString(separator = ", "))
         }
         else {
-            println("По стандарту сортировка происходит по Id")
+            println("Нет")
+            println("По стандарту сортировка происходит по ID")
         }
-        println()
+        if (currSort) {
+            println("Выбранный порядок: По возрастанию\n")
+        }
+        else println("Выбранный порядок: По убыванию\n")
+    }
+
+    fun <T: Enum<T>>printSortOptions(fields: List<T>, currSort: Boolean) {
+        println("\nВыберите, как будет происходить сортировка")
+        println("Можно выбрать максимум 2 поля")
+        print("Выбранные поля: ")
+        if (!fields.isEmpty()) {
+            println(fields.joinToString(separator = ", "))
+        } else println("Нет")
+        if (currSort) {
+            println("Выбранный порядок: По возрастанию\n")
+        }
+        else println("Выбранный порядок: По убыванию\n")
+    }
+
+    fun printUserSortMenu(fields: List<UserFields>, currSort: Boolean) {
+        printSortMenu("ПОЛЬЗОВАТЕЛЕЙ", fields, currSort)
         println("1. Выбрать поля сортировки")
         println("2. Отсортировать и вывести")
         println("0. Назад")
     }
 
     fun printUserSortOptions(fields: MutableList<UserFields>, currSort: Boolean) {
-        println("\nВыберите, как будет происходить сортировка")
-        println("Можно выбрать максимум 2 поля")
-        if (!fields.isEmpty()) {
-            print("Выбранные поля: ")
-            println(fields.joinToString(separator = ", "))
-        }
-        if (currSort) {
-            println("Выбранный порядок: По возрастанию\n")
-        }
-        else println("Выбранный порядок: По убыванию")
+        printSortOptions(fields, currSort)
         println("1. ID")
         println("2. Имя")
         println("3. Фамилия")
-        println("4. Пасспорт")
-        println("5. Удалить последний вариант")
+        println("4. Паспорт")
+        println("5. Удалить последнее поле")
         println("6. Поменять порядок сортировки")
         println("0. Назад")
     }
 
-    fun printSearchMenu(title: String) {
-        println("ПОИСК — $title")
+    fun printContractSortMenu(fields: List<ContractFields>, currSort: Boolean) {
+        printSortMenu("КОНТРАКТОВ", fields, currSort)
+        println("1. Выбрать поля сортировки")
+        println("2. Отсортировать и вывести")
+        println("0. Назад")
+    }
+
+    fun printContractSortOptions(fields: MutableList<ContractFields>, currSort: Boolean) {
+        printSortOptions(fields, currSort)
+        println("1. ID")
+        println("2. ID пользователя")
+        println("3. Объект страховки")
+        println("4. Цена страховки")
+        println("5. Дата начала")
+        println("6. Дата истечения")
+        println("7. Статус")
+        println("8. Страховая выплата")
+        println("9. Удалить последнее поле")
+        println("10. Поменять порядок сортировки")
+        println("0. Назад")
+    }
+
+    fun printSearchMenu(str: String) {
+        println("\nПОИСК $str")
         println("1. Поиск по ID")
         println("2. Поиск по тексту")
         println("0. Назад")

@@ -4,6 +4,7 @@ import kotlinx.serialization.json.Json
 import org.example.model.Contract
 import org.example.model.User
 import org.example.types.UserFields
+import org.example.util.UserComparator
 import java.io.File
 import kotlin.collections.mutableListOf
 
@@ -82,13 +83,47 @@ class UserRepository {
         return true
     }
 
-    fun sortUsers(field: UserFields): Boolean {
-        return when (field) {
-            UserFields.ID -> { users.sortBy { it.id } ; true }
-            UserFields.FIRST_NAME -> { users.sortBy { it.firstName } ; true }
-            UserFields.LAST_NAME -> { users.sortBy { it.lastName } ; true }
-            UserFields.PASSPORT -> { users.sortBy { it.passport } ; true}
-            else -> false
+    fun sortUsers(fields: List<UserFields>, currSort: Boolean) {
+        if (fields.isEmpty()) {
+            if (currSort) users.sortBy { it.id }
+            else users.sortByDescending { it.id }
+            return
+        }
+        if (fields.size == 1) {
+            when (fields[0]) {
+                UserFields.ID -> {
+                    if (currSort) users.sortBy { it.id }
+                    else users.sortByDescending { it.id }
+                }
+                UserFields.FIRST_NAME -> {
+                    if (currSort) users.sortBy { it.firstName }
+                    else users.sortByDescending { it.firstName }
+                }
+                UserFields.LAST_NAME -> {
+                    if (currSort) users.sortBy { it.lastName }
+                    else users.sortByDescending { it.lastName }
+                }
+                UserFields.PASSPORT -> {
+                    if (currSort) users.sortBy { it.passport }
+                    else users.sortByDescending { it.passport }
+                }
+            }
+            return
+        }
+        val first = fields[0]
+        val second = fields[1]
+        users.sortWith(UserComparator(first, second, currSort))
+    }
+
+    fun search(id: Int): List<User> {
+        return users.filter { it.id.toString().lowercase().contains(id.toString().lowercase()) }
+    }
+
+    fun search(str: String): List<User> {
+        val strLower = str.lowercase()
+        return users.filter { it.firstName.lowercase().contains(strLower) ||
+                it.lastName.lowercase().contains(strLower) ||
+                it.passport.toString().lowercase().contains(strLower)
         }
     }
 
