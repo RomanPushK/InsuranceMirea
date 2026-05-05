@@ -22,8 +22,8 @@ class UserRepository {
         mutableListOf()
     }
 
-    constructor() {
-        nextId = users[users.lastIndex].id + 1
+    init {
+        if (users.isNotEmpty()) nextId = users.maxOf { it.id } + 1
     }
 
     fun saveUsers() {

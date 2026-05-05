@@ -24,7 +24,7 @@ class ContractsRepository {
     }
 
     init {
-        nextId = contracts[contracts.lastIndex].id + 1
+        if (contracts.isNotEmpty()) nextId = contracts.maxOf { it.id } + 1
     }
 
     fun saveContracts() {
@@ -154,7 +154,7 @@ class ContractsRepository {
         if (index == -1) return false
         val curr = contracts[index]
         contracts[index] = curr.copy(insuranceObject = insuranceObject)
-        contracts[index].calculateAmount()
+        contracts[index].updateAmount()
         saveContracts()
         return true
     }
@@ -164,7 +164,7 @@ class ContractsRepository {
         if (index == -1) return false
         val curr = contracts[index]
         contracts[index] = curr.copy(price = price)
-        contracts[index].calculateAmount()
+        contracts[index].updateAmount()
         saveContracts()
         return true
     }

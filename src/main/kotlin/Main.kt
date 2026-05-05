@@ -56,7 +56,9 @@ class Main {
 
             when (choice) {
                 0 -> {
-                    println("Выход из программы")
+                    usersRepo.saveUsers()
+                    contractsRepo.saveContracts()
+                    println("Данные сохранены. Выход из программы.")
                     return
                 }
                 1 -> printUsers()
@@ -493,35 +495,58 @@ class Main {
     }
 
     private fun showStatistics() {
-        println("\nСТАТИСТИКА")
+        println("\nСТАТИСТИКА СТРАХОВОЙ КОМПАНИИ")
         val users = usersRepo.getUsers()
         val contracts = contractsRepo.getContracts()
-        val totalProfit = calculateProfit(contracts)
-        val activeSum = contracts.filter { it.status == InsuranceStatuses.ACTIVE }
-            .fold(0.0) {acc, next -> acc + next.price}
-        var bestUser: User? = null
-        var worstUser: User? = null
-        if (users.isNotEmpty()) {
-            bestUser = users[0]
-            var bestProfit: Double = calculateProfit(bestUser.contracts)
-            worstUser = users[0]
-            var worstProfit: Double = calculateProfit(worstUser.contracts)
-            for (i in users) {
-                val profit = calculateProfit(i.contracts)
-                if (profit > bestProfit) { bestUser = i; bestProfit = profit }
-                if (profit < worstProfit) { worstUser = i; worstProfit = profit }
-            }
+        if (contracts.isEmpty()) {
+            println("Нет данных для статистики.")
+            consoleWait()
+            return
         }
+        val totalContracts = contracts.size
+        val activeContracts = contracts.count { it.status == InsuranceStatuses.ACTIVE }
+        val expiredContracts = contracts.count { it.status == InsuranceStatuses.EXPIRED }
+        val paidContracts = contracts.count { it.status == InsuranceStatuses.PAID }
+        val totalPremium = contracts.sumOf { it.price }
+        val avgPremium = totalPremium / totalContracts
+        val totalAmount = contracts.filter { it.status == InsuranceStatuses.PAID } .sumOf { it.amount }
+        val activePremium = contracts.filter { it.status == InsuranceStatuses.ACTIVE }
+            .sumOf { it.price }
 
-        println("Всего пользователей: ${users.size}")
-        println("Всего контрактов: ${contracts.size}")
-        println("Итоговый заработок:  $totalProfit")
-        println("Сумма активных контрактов: $activeSum")
-        if (bestUser != null && worstUser != null) {
-            println("Лучший пользователь: $bestUser, Заработок: ${calculateProfit(bestUser.contracts)}")
-            println("Худший пользователь: $worstUser, Заработок: ${calculateProfit(worstUser.contracts)}")
+        println("Количество пользователей: ${users.size}")
+        println("Количество контрактов: $totalContracts")
+        println("Активных контрактов: $activeContracts")
+        println("Истекших контрактов: $expiredContracts")
+        println("Выплаченных контрактов: $paidContracts")
+        println("Общий доход: ${"%.2f".format(totalPremium - totalAmount)}")
+        println("Средняя цена контракта: ${"%.2f".format(avgPremium)}")
+        println("Общая сумма выплат: ${"%.2f".format(totalAmount)}")
+        println("Общая цена активных контрактов: ${"%.2f".format(activePremium)}")
+
+        if (users.isNotEmpty()) {
+            var bestUser = users[0]
+            var bestProfit = calculateProfit(bestUser.contracts)
+
+            var worstUser = users[0]
+            var worstProfit = calculateProfit(worstUser.contracts)
+
+            for (user in users) {
+                val profit = calculateProfit(user.contracts)
+                if (profit > bestProfit) {
+                    bestProfit = profit
+                    bestUser = user
+                }
+                if (profit < worstProfit) {
+                    worstProfit = profit
+                    worstUser = user
+                }
+            }
+            if (bestProfit > 0) println("Самый прибыльный клиент: " +
+                    "${bestUser.firstName} ${bestUser.lastName}, прибыль: $bestProfit")
+            if (worstProfit < 0) println("Самый убыточный клиент: " +
+                    "${worstUser.firstName} ${worstUser.lastName}, убыток: $worstProfit")
+            consoleWait()
         }
-        consoleWait()
     }
 
     private fun consoleWait() {
