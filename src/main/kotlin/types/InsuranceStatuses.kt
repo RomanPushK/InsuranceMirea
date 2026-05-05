@@ -5,4 +5,6 @@ enum class InsuranceStatuses(val displayName: String) {
     EXPIRED("Истек"),
     CANCELLED("Отменен"),
     PAID("Выплачен");
+
+    override fun toString() = displayName
 }

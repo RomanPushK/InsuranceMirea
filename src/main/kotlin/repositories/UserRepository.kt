@@ -1,5 +1,6 @@
 package org.example.repositories
 
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.example.model.Contract
 import org.example.model.User
@@ -25,6 +26,10 @@ class UserRepository {
         nextId = users[users.lastIndex].id + 1
     }
 
+    fun saveUsers() {
+        file.writeText(Json.encodeToString<List<User>>(users.sortedBy { it.id }))
+    }
+
     fun getSize(): Int {
         return users.size
     }
@@ -40,12 +45,14 @@ class UserRepository {
     fun addUser(user: User): Boolean {
         try {
             users.addLast(user)
+            saveUsers()
             return true
         } catch (err: Exception) { return false }
     }
 
     fun deleteUser(id: Int): Boolean {
         val res = users.removeIf { it.id == id }
+        if (res) saveUsers()
         return res
     }
 
@@ -53,6 +60,7 @@ class UserRepository {
         val index = users.indexOfFirst { it.id == id }
         if (index == -1) return false
         users[index] = newUser.copy(id = id)
+        saveUsers()
         return true
     }
 
@@ -62,6 +70,7 @@ class UserRepository {
         val curr = users[index]
         users[index] = curr.copy(firstName = firstName)
         users[index].contracts.addAll(curr.contracts)
+        saveUsers()
         return true
     }
 
@@ -71,6 +80,7 @@ class UserRepository {
         val curr = users[index]
         users[index] = curr.copy(lastName = lastName)
         users[index].contracts.addAll(curr.contracts)
+        saveUsers()
         return true
     }
 
@@ -80,6 +90,7 @@ class UserRepository {
         val curr = users[index]
         users[index] = curr.copy(passport = passport)
         users[index].contracts.addAll(curr.contracts)
+        saveUsers()
         return true
     }
 
@@ -87,6 +98,7 @@ class UserRepository {
         if (fields.isEmpty()) {
             if (currSort) users.sortBy { it.id }
             else users.sortByDescending { it.id }
+            saveUsers()
             return
         }
         if (fields.size == 1) {
@@ -108,11 +120,14 @@ class UserRepository {
                     else users.sortByDescending { it.passport }
                 }
             }
+            saveUsers()
             return
         }
         val first = fields[0]
         val second = fields[1]
         users.sortWith(UserComparator(first, second, currSort))
+        saveUsers()
+        return
     }
 
     fun search(id: Int): List<User> {

@@ -1,17 +1,1 @@
-[
-  { "id": 1, "firstName": "Ivan", "lastName": "Petrov", "passport": 123456 },
-  { "id": 2, "firstName": "Sergey", "lastName": "Ivanov", "passport": 234567 },
-  { "id": 3, "firstName": "Anna", "lastName": "Smirnova", "passport": 345678 },
-  { "id": 4, "firstName": "Olga", "lastName": "Kuznetsova", "passport": 456789 },
-  { "id": 5, "firstName": "Dmitry", "lastName": "Popov", "passport": 567890 },
-  { "id": 6, "firstName": "Nikita", "lastName": "Sokolov", "passport": 678901 },
-  { "id": 7, "firstName": "Elena", "lastName": "Lebedeva", "passport": 789012 },
-  { "id": 8, "firstName": "Artem", "lastName": "Kozlov", "passport": 890123 },
-  { "id": 9, "firstName": "Maria", "lastName": "Novikova", "passport": 901234 },
-  { "id": 10, "firstName": "Pavel", "lastName": "Morozov", "passport": 112233 },
-  { "id": 11, "firstName": "Andrey", "lastName": "Volkov", "passport": 223344 },
-  { "id": 12, "firstName": "Irina", "lastName": "Solovyova", "passport": 334455 },
-  { "id": 13, "firstName": "Alexey", "lastName": "Vasiliev", "passport": 445566 },
-  { "id": 14, "firstName": "Tatiana", "lastName": "Zaitseva", "passport": 556677 },
-  { "id": 15, "firstName": "Maxim", "lastName": "Pavlov", "passport": 667788 }
-]
+[{"id":1,"firstName":"Ivan","lastName":"Petrov","passport":123456},{"id":2,"firstName":"Sergey","lastName":"Ivanov","passport":234567},{"id":3,"firstName":"Anna","lastName":"Smirnova","passport":345678},{"id":4,"firstName":"Olga","lastName":"Kuznetsova","passport":456789},{"id":5,"firstName":"Dmitry","lastName":"Popov","passport":567890},{"id":6,"firstName":"Nikita","lastName":"Sokolov","passport":678901},{"id":7,"firstName":"Elena","lastName":"Lebedeva","passport":789012},{"id":8,"firstName":"Artem","lastName":"Kozlov","passport":890123},{"id":9,"firstName":"Maria","lastName":"Novikova","passport":901234},{"id":10,"firstName":"Pavel","lastName":"Morozov","passport":112233},{"id":11,"firstName":"Andrey","lastName":"Volkov","passport":223344},{"id":12,"firstName":"Irina","lastName":"Solovyova","passport":334455},{"id":13,"firstName":"Alexey","lastName":"Vasiliev","passport":445566},{"id":14,"firstName":"Tatiana","lastName":"Zaitseva","passport":556677},{"id":15,"firstName":"Maxim","lastName":"Pavlov","passport":667788},{"id":16,"firstName":"Ilya","lastName":"Sfentografov","passport":777777}]

@@ -1,14 +1,13 @@
 package org.example.repositories
 
 import kotlinx.datetime.LocalDate
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.example.model.Contract
 import org.example.types.ContractFields
 import org.example.types.InsuranceObjects
 import org.example.types.InsuranceStatuses
-import org.example.types.UserFields
 import org.example.util.ContractComparator
-import org.example.util.UserComparator
 import java.io.File
 
 class ContractsRepository {
@@ -26,6 +25,10 @@ class ContractsRepository {
 
     init {
         nextId = contracts[contracts.lastIndex].id + 1
+    }
+
+    fun saveContracts() {
+        file.writeText(Json.encodeToString<List<Contract>>(contracts.sortedBy { it.id }))
     }
 
     fun getSize(): Int {
@@ -47,17 +50,20 @@ class ContractsRepository {
     fun addContract(contract: Contract): Boolean {
         try {
             contracts.addLast(contract)
+            saveContracts()
             return true
         } catch (err: Exception) { return false }
     }
 
     fun deleteContract(id: Int): Boolean {
         val res = contracts.removeIf { it.id == id }
+        if (res) saveContracts()
         return res
     }
 
     fun deleteContractsByUser(userId: Int): Boolean {
         val res = contracts.removeIf { it.userId == userId }
+        if (res) saveContracts()
         return res
     }
 
@@ -130,6 +136,7 @@ class ContractsRepository {
         val index = contracts.indexOfFirst { it.id == id }
         if (index == -1) return false
         contracts[index] = newContract.copy(id = id)
+        saveContracts()
         return true
     }
 
@@ -138,7 +145,7 @@ class ContractsRepository {
         if (index == -1) return false
         val curr = contracts[index]
         contracts[index] = curr.copy(userId = userId)
-        contracts[index]
+        saveContracts()
         return true
     }
 
@@ -148,6 +155,7 @@ class ContractsRepository {
         val curr = contracts[index]
         contracts[index] = curr.copy(insuranceObject = insuranceObject)
         contracts[index].calculateAmount()
+        saveContracts()
         return true
     }
 
@@ -157,6 +165,7 @@ class ContractsRepository {
         val curr = contracts[index]
         contracts[index] = curr.copy(price = price)
         contracts[index].calculateAmount()
+        saveContracts()
         return true
     }
 
@@ -166,6 +175,7 @@ class ContractsRepository {
         val curr = contracts[index]
         if (startDate > curr.endDate) return false
         contracts[index] = curr.copy(startDate = startDate)
+        saveContracts()
         return true
     }
 
@@ -175,6 +185,7 @@ class ContractsRepository {
         val curr = contracts[index]
         if (endDate < curr.startDate)
         contracts[index] = curr.copy(endDate = endDate)
+        saveContracts()
         return true
     }
 
@@ -183,6 +194,7 @@ class ContractsRepository {
         if (index == -1) return false
         val curr = contracts[index]
         contracts[index] = curr.copy(status = status)
+        saveContracts()
         return true
     }
 

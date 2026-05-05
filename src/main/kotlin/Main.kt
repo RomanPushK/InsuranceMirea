@@ -75,19 +75,19 @@ class Main {
 
 
     private fun printUsers() {
-        println("СПИСОК ПОЛЬЗОВАТЕЛЕЙ")
+        println("\nСПИСОК ПОЛЬЗОВАТЕЛЕЙ")
         println(usersRepo)
         consoleWait()
     }
 
     private fun printContracts() {
-        println("СПИСОК ДОГОВОРОВ")
+        println("\nСПИСОК ДОГОВОРОВ")
         println(contractsRepo)
         consoleWait()
     }
 
     private fun printUsersWithContracts() {
-        println("ПОЛЬЗОВАТЕЛИ С ДОГОВОРАМИ")
+        println("\nПОЛЬЗОВАТЕЛИ С ДОГОВОРАМИ")
         println(usersRepo.printWithContracts())
         consoleWait()
     }
@@ -172,9 +172,9 @@ class Main {
             consoleWait()
             return
         }
-        if (console.readYesNo("Вы действительно хотите удалить пользователя $id и все его договоры? (y/n)")) {
+        if (console.readYesNo("Вы действительно хотите удалить пользователя $id и все его контракты? (y/n)")) {
             deleteUser(id)
-            println("Пользователь и его договоры удалены")
+            println("Пользователь и его контракты удалены")
         }
         consoleWait()
     }
@@ -193,8 +193,14 @@ class Main {
                 4 -> printContracts()
                 5 -> {
                     val userId = console.readPositiveInt("ID пользователя")
-                    println("ДОГОВОРЫ ПОЛЬЗОВАТЕЛЯ $userId")
-                    println(contractsRepo.getContractsByUser(userId).joinToString(separator = "\n"))
+                    val userContracts = contractsRepo.getContractsByUser(userId)
+                    if (userContracts.isEmpty()) {
+                        println("У ПОЛЬЗОВАТЕЛЯ НЕТ КОНТРАКТОВ")
+                    }
+                    else {
+                        println("КОНТРАКТЫ ПОЛЬЗОВАТЕЛЯ $userId")
+                        println(contractsRepo.getContractsByUser(userId).joinToString(separator = "\n"))
+                    }
                     consoleWait()
                 }
             }
@@ -303,7 +309,7 @@ class Main {
     }
 
     private fun deleteContract() {
-        val id = console.readPositiveInt("ID договора")
+        val id = console.readPositiveInt("ID контракта")
         val contract = contractsRepo.getById(id)
         if (contract == null) {
             println("Контракт не найден")
@@ -312,7 +318,7 @@ class Main {
         }
         if (console.readYesNo("Вы действительно хотите удалить контракт $id? (y/n)")) {
             deleteContract(id)
-            println("Договор удалён")
+            println("Контракт удалён")
         }
         consoleWait()
     }
@@ -332,14 +338,18 @@ class Main {
     private fun searchUsersId() {
         println("Введите ID для поиска")
         val ch = console.readPositiveInt("Id")
-        println(usersRepo.search(ch).joinToString(separator = "\n", prefix = "\n"))
+        val found = usersRepo.search(ch)
+        if (found.isEmpty()) println("\nНичего не найдено")
+        else println(found.joinToString(separator = "\n", prefix = "\n"))
         consoleWait()
     }
 
     private fun searchUsersString() {
         println("Введите ID для поиска")
         val ch = console.readString("Подстрока")
-        println(usersRepo.search(ch).joinToString(separator = "\n", prefix = "\n"))
+        val found = usersRepo.search(ch)
+        if (found.isEmpty()) println("\nНичего не найдено")
+        else println(found.joinToString(separator = "\n", prefix = "\n"))
         consoleWait()
     }
 
@@ -358,14 +368,18 @@ class Main {
     private fun searchContractsId() {
         println("Введите ID для поиска")
         val ch = console.readPositiveInt("Id")
-        println(contractsRepo.search(ch).joinToString(separator = "\n", prefix = "\n"))
+        val found = contractsRepo.search(ch)
+        if (found.isEmpty()) println("\nНичего не найдено")
+        else println(found.joinToString(separator = "\n", prefix = "\n"))
         consoleWait()
     }
 
     private fun searchContractsString() {
         println("Введите ID для поиска")
         val ch = console.readString("Подстрока")
-        println(contractsRepo.search(ch).joinToString(separator = "\n", prefix = "\n"))
+        val found = contractsRepo.search(ch)
+        if (found.isEmpty()) println("\nНичего не найдено")
+        else println(found.joinToString(separator = "\n", prefix = "\n"))
         consoleWait()
     }
 
@@ -469,12 +483,44 @@ class Main {
         return Pair(selected, currSort)
     }
 
+    private fun calculateProfit(data: List<Contract>): Double {
+        var totalProfit: Double = 0.0
+        for (i in data) {
+            if (i.status == InsuranceStatuses.EXPIRED) totalProfit += i.price
+            else if (i.status == InsuranceStatuses.PAID) totalProfit -= i.amount
+        }
+        return totalProfit
+    }
+
     private fun showStatistics() {
-        println("СТАТИСТИКА")
-        val totalUsers = usersRepo.getUsers().size
-        val totalContracts = contractsRepo.getContracts().size
-        println("Всего пользователей: $totalUsers")
-        println("Всего договоров: $totalContracts")
+        println("\nСТАТИСТИКА")
+        val users = usersRepo.getUsers()
+        val contracts = contractsRepo.getContracts()
+        val totalProfit = calculateProfit(contracts)
+        val activeSum = contracts.filter { it.status == InsuranceStatuses.ACTIVE }
+            .fold(0.0) {acc, next -> acc + next.price}
+        var bestUser: User? = null
+        var worstUser: User? = null
+        if (users.isNotEmpty()) {
+            bestUser = users[0]
+            var bestProfit: Double = calculateProfit(bestUser.contracts)
+            worstUser = users[0]
+            var worstProfit: Double = calculateProfit(worstUser.contracts)
+            for (i in users) {
+                val profit = calculateProfit(i.contracts)
+                if (profit > bestProfit) { bestUser = i; bestProfit = profit }
+                if (profit < worstProfit) { worstUser = i; worstProfit = profit }
+            }
+        }
+
+        println("Всего пользователей: ${users.size}")
+        println("Всего контрактов: ${contracts.size}")
+        println("Итоговый заработок:  $totalProfit")
+        println("Сумма активных контрактов: $activeSum")
+        if (bestUser != null && worstUser != null) {
+            println("Лучший пользователь: $bestUser, Заработок: ${calculateProfit(bestUser.contracts)}")
+            println("Худший пользователь: $worstUser, Заработок: ${calculateProfit(worstUser.contracts)}")
+        }
         consoleWait()
     }
 
